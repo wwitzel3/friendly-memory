@@ -1,9 +1,9 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
 
-import { RouterOutputs, api } from "~/utils/api";
-import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
+import type { RouterOutputs } from "~/utils/api";
+import { api } from "~/utils/api";
+import { SignInButton, useUser } from "@clerk/nextjs";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -14,35 +14,54 @@ import { useState } from "react";
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
+  const [input, setInput] = useState("");
   const { user } = useUser();
   if (!user) return null;
 
   const ctx = api.useContext();
 
-  const { mutate } = api.posts.create.useMutation({
+  const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
     onSuccess: () => {
       setInput("");
-      ctx.posts.getAll.invalidate();
-    }
+      void ctx.posts.getAll.invalidate();
+    },
   });
-  const [input, setInput] = useState("");
 
   return (
-    <div className="flex gap-3 w-full">
-      <Image src={user.profileImageUrl} alt="Profile image" className="h-16 w-16 rounded-full" width={56} height={56}/>
-      <input placeholder="Emojies here!" className="bg-transparent grow outline-none" type="text" value={input} onChange={(e) => setInput(e.target.value)}/>
-      <button onClick={() => mutate({content: input})}>Post</button>
+    <div className="flex w-full gap-3">
+      <Image
+        src={user.profileImageUrl}
+        alt="Profile image"
+        className="h-16 w-16 rounded-full"
+        width={56}
+        height={56}
+      />
+      <input
+        placeholder="Emojies here!"
+        className="grow bg-transparent outline-none"
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        disabled={isPosting}
+      />
+      <button onClick={() => mutate({ content: input })}>Post</button>
     </div>
-  )
-}
+  );
+};
 
 type PostWithUser = RouterOutputs["posts"]["getAll"][number];
 
 const PostView = (props: PostWithUser) => {
-  const {post, author} = props;
+  const { post, author } = props;
   return (
-    <div key={post.id} className="p-4 border-b border-slate-400 flex gap-3">
-      <Image alt="profile image" src={author.profileImageUrl} className="h-16 w-16 rounded-full" width={56} height={56}/>
+    <div key={post.id} className="flex gap-3 border-b border-slate-400 p-4">
+      <Image
+        alt="profile image"
+        src={author.profileImageUrl}
+        className="h-16 w-16 rounded-full"
+        width={56}
+        height={56}
+      />
       <div className="flex flex-col">
         <div className="flex gap-1 text-slate-300">
           <span>{`@${author.username}`} </span>
@@ -50,22 +69,22 @@ const PostView = (props: PostWithUser) => {
         </div>
         <span>{post.content}</span>
       </div>
-      </div>
-  )
-}
+    </div>
+  );
+};
 
 const Feed = () => {
   const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
-  if (postsLoading) return <LoadingPage/>;
+  if (postsLoading) return <LoadingPage />;
 
   return (
     <div className="flex flex-col">
-    {data?.map((fullPost) => (
-      <PostView {...fullPost} key={fullPost.post.id}/>
-    ))}
-  </div>
-  )
-}
+      {data?.map((fullPost) => (
+        <PostView {...fullPost} key={fullPost.post.id} />
+      ))}
+    </div>
+  );
+};
 const Home: NextPage = () => {
   const { isLoaded: userLoaded, isSignedIn } = useUser();
   api.posts.getAll.useQuery();
@@ -82,9 +101,9 @@ const Home: NextPage = () => {
 
       <main className="flex h-screen justify-center">
         <div className="w-full border-x border-slate-400 md:max-w-2xl">
-          <div className="border-b flex border-slate-400 p-4">
-            {isSignedIn && <CreatePostWizard/> }
-            {!isSignedIn && <SignInButton /> }
+          <div className="flex border-b border-slate-400 p-4">
+            {isSignedIn && <CreatePostWizard />}
+            {!isSignedIn && <SignInButton />}
           </div>
 
           <Feed />

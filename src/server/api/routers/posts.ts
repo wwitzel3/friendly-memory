@@ -1,4 +1,4 @@
-import { User } from "@clerk/backend";
+import type { User } from "@clerk/backend";
 import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -33,7 +33,7 @@ export const postsRouter = createTRPCRouter({
     return posts.map((post) => {
       const author = users.find((user) => user.id === post.authorId);
 
-      if (!author) {
+      if (!author || !author.username) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Author for post not found",
@@ -42,7 +42,10 @@ export const postsRouter = createTRPCRouter({
 
       return {
         post,
-        author,
+        author: {
+          ...author,
+          username: author.username,
+        },
       };
     });
   }),
