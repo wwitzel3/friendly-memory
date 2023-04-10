@@ -1,5 +1,4 @@
 import { type NextPage } from "next";
-import Head from "next/head";
 
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
