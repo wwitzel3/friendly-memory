@@ -62,7 +62,6 @@ import { prisma } from "~/server/db";
 import { appRouter } from "~/server/api/root";
 import superjson from "superjson";
 import { PageLayout } from "~/components/layout";
-import { procedureTypes } from "@trpc/server";
 import { LoadingPage } from "~/components/loading";
 import { PostView } from "~/components/postview";
 
