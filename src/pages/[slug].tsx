@@ -10,6 +10,7 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
   });
 
   if (!data) return <div>404</div>;
+  if (!data.username) return <div>404</div>;
 
   return (
     <>
